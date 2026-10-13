@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Профессиональный Калькулятор стоимости обучения ИИ и Fine-Tuning онлайн</title>
+<meta name="description" content="Бесплатный инженерный симулятор для расчета бюджетов на дообучение нейросетей. Оценка стоимости LoRA, QLoRA, аренды GPU H100/RTX 4090 и ROI автоматизации.">
+<style>
+:root{--primary:#4f46e5;--primary-hover:#4338ca;--success:#16a34a;--danger:#dc2626;--bg:#f8fafc;--card-bg:#ffffff;--text:#0f172a;--text-muted:#64748b;--border:#e2e8f0;--accent:#ea580c;--purple:#7c3aed;--indigo:#6366f1}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{background:var(--bg);color:var(--text);padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.wrapper{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:530px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05)}
+h1{font-size:21px;font-weight:700;margin-bottom:4px;text-align:center;letter-spacing:-0.025em}
+.subtitle{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:20px}
+.live-meter{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:20px;text-align:center}
+.meter-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;letter-spacing:0.05em}
+.bar-container{background:var(--border);border-radius:20px;height:12px;width:100%;overflow:hidden;position:relative}
+.bar-fill{background:var(--primary);width:30%;height:100%;transition:all 0.4s ease}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--bg);padding:4px;border-radius:10px;margin-bottom:20px;border:1px solid var(--border)}
+.tab-btn{padding:10px 2px;background:none;border:none;border-radius:8px;font-size:11px;font-weight:700;color:var(--text-muted);cursor:pointer;transition:all 0.2s;text-align:center}
+.tab-btn.active{background:var(--card-bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.group{margin-bottom:16px}
+.radio-group{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.radio-label{border:1px solid var(--border);padding:10px 4px;border-radius:8px;text-align:center;font-size:12px;font-weight:700;color:var(--text-muted);cursor:pointer;transition:all 0.2s}
+.radio-group input[type="radio"]{display:none}
+.radio-group input[type="radio"]:checked + .radio-label{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 4px rgba(79,70,229,0.15)}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text)}
+select,input[type="number"]{width:100%;padding:11px;border:1px solid var(--border);border-radius:10px;font-size:15px;background:#fff;color:var(--text);transition:border 0.2s}
+select:focus,input:focus{border-color:var(--primary);outline:none}
+input[type="range"]{width:100%;margin:8px 0;cursor:pointer}
+.range-val{font-size:14px;font-weight:700;color:var(--primary);float:right}
+.calc-btn{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;box-shadow:0 4px 6px -1px rgba(79,70,229,0.2);transition:background 0.2s}
+.calc-btn:hover{background:var(--primary-hover)}
+.skynet-box{background:#fee2e2;border:1px solid #fca5a5;border-radius:12px;padding:14px;margin-top:20px;display:none}
+.skynet-title{font-size:12px;font-weight:700;color:var(--danger);margin-bottom:6px;text-transform:uppercase;text-align:center;letter-spacing:0.05em}
+.results{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:20px;display:none}
+.res-title{font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-align:center;text-transform:uppercase;letter-spacing:0.05em}
+.res-row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;border-bottom:1px dashed var(--border);align-items:center}
+.res-row:last-child{border-bottom:none}
+.res-val{font-weight:700;color:var(--primary);text-align:right;max-width:65%}
+.res-val.loss{color:var(--danger)}
+.ad{display:none;margin-top:15px;min-height:90px;text-align:center;justify-content:center;align-items:center;width:100%}
+.partner-btn{display:block;width:100%;padding:11px;background:#fff;border:1px solid var(--purple);color:var(--purple);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;text-align:center;margin-top:12px;text-decoration:none}
+.partner-btn:hover{background:var(--purple);color:#fff}
+.seo-text{font-size:12px;color:var(--text-muted);margin-top:24px;text-align:justify;line-height:1.4;border-top:1px solid var(--border);padding-top:16px;display:none}
+</style>
+</head>
+<body>
+<div class="wrapper">
+<h1>ИИ-Симулятор Обучения</h1>
+<div class="subtitle">Профессиональный аудит бюджетов Fine-Tuning и кластеров GPU</div>
+
+<div class="live-meter">
+<div class="meter-label">Статус Матрицы Вычислений: <span id="live-preview-zone">Инициализация</span></div>
+<div class="bar-container"><div class="bar-fill" id="bar-fill"></div></div>
+</div>
+
+<div class="group">
+<label for="currency">Региональная валюта расчетов</label>
+<select id="currency" onchange="updatePreview()">
+<option value="₽">Рубль (₽)</option>
+<option value="грн">Гривна (грн)</option>
+<option value="₸">Тенге (₸)</option>
+<option value="Br">Бел. рубль (Br)</option>
+<option value="₾">Лари (₾)</option>
+</select>
+</div>
+
+<div class="tabs">
+<button class="tab-btn active" onclick="switchTab('dataset', this)">Данные & Стратегия</button>
+<button class="tab-btn" onclick="switchTab('compute', this)">Кластер GPU</button>
+<button class="tab-btn" onclick="switchTab('roi', this)">Экономика ROI</button>
+</div>
+<!-- ВКЛАДКА 1: ДАННЫЕ И СТРАТЕГИЯ -->
+<div id="tab-dataset" class="tab-content active">
+<div class="group">
+<label>Методология обучения (Архитектура)</label>
+<div class="radio-group">
+<input type="radio" id="strategy-full" name="strategy" value="full" checked onchange="updatePreview()">
+<label for="strategy-full" class="radio-label">Full Tuning</label>
+<input type="radio" id="strategy-lora" name="strategy" value="lora" onchange="updatePreview()">
+<label for="strategy-lora" class="radio-label">LoRA (16-bit)</label>
+<input type="radio" id="strategy-qlora" name="strategy" value="qlora" onchange="updatePreview()">
+<label for="strategy-qlora" class="radio-label">QLoRA (4-bit)</label>
+</div>
+</div>
+<div class="group">
+<label for="dataset-size">Исходный объем датасета (ГБ) <span class="range-val" id="dataset-val">10</span></label>
+<input type="range" id="dataset-size" min="1" max="1000" value="10" oninput="document.getElementById('dataset-val').innerText=this.value; updatePreview();">
+</div>
+<div class="group">
+<label for="data-noise">Шум и глубина фильтрации данных (%) <span class="range-val" id="noise-val">20%</span></label>
+<input type="range" id="data-noise" min="0" max="80" value="20" step="5" oninput="document.getElementById('noise-val').innerText=this.value+'%'; updatePreview();">
+</div>
+<div class="group">
+<label for="epochs">Количество эпох обучения <span class="range-val" id="epochs-val">3</span></label>
+<input type="range" id="epochs" min="1" max="50" value="3" oninput="document.getElementById('epochs-val').innerText=this.value; updatePreview();">
+</div>
+</div>
+
+<!-- ВКЛАДКА 2: КЛАСТЕР GPU -->
+<div id="tab-compute" class="tab-content">
+<div class="group">
+<label for="gpu-type">Вычислительный чип (Узел GPU)</label>
+<select id="gpu-type" onchange="updatePreview()">
+<option value="h100">NVIDIA H100 SXM (Элитный облачный)</option>
+<option value="a100">NVIDIA A100 (Промышленный стандарт)</option>
+<option value="rtx4090">NVIDIA RTX 4090 (Потребительский узел)</option>
+</select>
+</div>
+<div class="group">
+<label for="gpu-count">Размер кластера (Количество GPU) <span class="range-val" id="gpu-count-val">8</span></label>
+<input type="range" id="gpu-count" min="1" max="64" value="8" oninput="document.getElementById('gpu-count-val').innerText=this.value; updatePreview();">
+</div>
+<div class="group">
+<label for="infra-type">Инфраструктурный провайдер</label>
+<select id="infra-type" onchange="updatePreview()">
+<option value="bare-metal">Сырая мощность (Vast.ai / RunPod)</option>
+<option value="cloud-api">Корпоративное API (OpenAI / Anthropic)</option>
+</select>
+</div>
+</div>
+
+<!-- ВКЛАДКА 3: ЭКОНОМИКА ROI -->
+<div id="tab-roi" class="tab-content">
+<div class="group">
+<label for="engineer-salary">Зарплата Data Scientist / Инженера в месяц</label>
+<input type="number" id="engineer-salary" value="150000" min="1" max="5000000" oninput="updatePreview()">
+</div>
+<div class="group">
+<label for="legacy-spend">Затраты на готовые API без дообучения (в месяц)</label>
+<input type="number" id="legacy-spend" value="80000" min="1" max="5000000" oninput="updatePreview()">
+</div>
+</div>
+
+<button class="calc-btn" onclick="calculateAiMetrics()">Запустить аудит вычислений</button>
+
+<div class="results" id="results-box">
+<div class="res-title">Инженерно-экономический баланс</div>
+<div class="res-row"><span>Размер датасета после фильтрации:</span><span class="res-val" id="res-clean-data">0 ГБ</span></div>
+<div class="res-row"><span>Эффективная мощность (налог NVLink):</span><span class="res-val" id="res-nvlink">100%</span></div>
+<div class="res-row"><span>Итоговая стоимость обучения (Compute):</span><span class="res-val" id="res-infra">0</span></div>
+<div class="res-row" id="payback-row" style="display:none;"><span>Срок окупаемости ИИ-инфраструктуры:</span><span class="res-val" id="res-payback" style="color:var(--purple)">0</span></div>
+<div class="res-row"><span>Чистая годовая экономия бюджета:</span><span class="res-val" id="res-savings" style="color:var(--success)">0</span></div>
+<div class="res-row"><span>Эффективность ИИ-архитектуры (ROI):</span><span class="res-val" id="res-roi">0</span></div>
+<a href="https://runpod.io" target="_blank" class="partner-btn" id="partner-link">🤖 Развернуть кластер на RunPod (Заглушка)</a>
+</div>
+
+<div class="skynet-box" id="skynet-container">
+<div class="skynet-title">🔮 Матрица Переобучения & Скайнет</div>
+<div class="res-row" style="border-bottom:none; color:#991b1b; font-size:12px; text-align:justify;"><span id="skynet-verdict">Запустите аудит вычислений для оценки устойчивости нейросети.</span></div>
+</div>
+
+<div id="ads" class="ad"><div id="container-e8c895e6c70ade8e4ef4a72354f42e97"></div></div>
+
+<div class="seo-text" id="seo-box">
+Наш профессиональный калькулятор стоимости обучения ИИ и Fine-Tuning рассчитывает точные затраты на дообучение и оптимизацию языковых моделей. Система оценивает физику датасетов с учетом потерь на фильтрацию и шум данных. Алгоритмы симулятора учитывают коэффициенты сжатия памяти LoRA и QLoRA (4-bit квантизация), вычисляют налог на параллелизм и синхронизацию памяти через мосты NVLink в распределенных кластерах до 64 графических чипов (NVIDIA H100, A100, RTX 4090). Утилита позволяет сравнить развертывание на сырых мощностях хостингов RunPod и Vast.ai с корпоративными тарифами API, генерируя точные финансовые метрики окупаемости (ROI) и предотвращая переобучение нейросетей. Все вычисления производятся локально в браузере.
+</div>
+</div>
+<script>
+let currentTab = 'dataset';
+
+// Актуальная база стоимости аренды GPU (в USD за 1 чип в час на октябрь 2026)
+const gpuPricesUSD = {
+  h100: { bareMetal: 2.20, cloudApi: 4.50 },
+  a100: { bareMetal: 1.10, cloudApi: 2.80 },
+  rtx4090: { bareMetal: 0.40, cloudApi: 0.90 }
+};
+
+// Производительность чипов в TFLOPS (для расчета налога параллелизма)
+const gpuTflops = { h100: 67, a100: 19, rtx4090: 83 };
+
+const fiatToUSD = {
+  "₽": 0.011, "грн": 0.024, "₸": 0.0021, "Br": 0.31, "₾": 0.37
+};
+
+function switchTab(tabName, btn) {
+  currentTab = tabName;
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const contents = document.querySelectorAll('.tab-content');
+  contents.forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+  updatePreview();
+}
+
+function calculateAllAiMetrics() {
+  const currency = document.getElementById('currency').value;
+  const fiatRate = fiatToUSD[currency] || 1;
+
+  // 1. Параметры Данных и Стратегии
+  const strategy = document.querySelector('input[name="strategy"]:checked').value;
+  const datasetSize = parseFloat(document.getElementById('dataset-size').value);
+  const dataNoise = parseFloat(document.getElementById('data-noise').value);
+  const epochs = parseFloat(document.getElementById('epochs').value);
+
+  // Расчет чистого датасета после фильтрации
+  const cleanDatasetSize = datasetSize * (1 - dataNoise / 100);
+
+  // 2. Параметры Вычислительного Кластера
+  const gpuType = document.getElementById('gpu-type').value;
+  const gpuCount = parseInt(document.getElementById('gpu-count').value);
+  const infraType = document.getElementById('infra-type').value;
+
+  // Налог на связь NVLink / InfiniBand при параллельных вычислениях (Multi-GPU)
+  // Чем больше видеокарт, тем выше налог на синхронизацию памяти
+  let nvlinkEfficiency = 1.00;
+  if (gpuCount > 1 && gpuCount <= 8) nvlinkEfficiency = 0.92;
+  else if (gpuCount > 8 && gpuCount <= 32) nvlinkEfficiency = 0.85;
+  else if (gpuCount > 32) nvlinkEfficiency = 0.76;
+
+  // Базовая стоимость чипа в час в зависимости от типа провайдера
+  const pricePerHourUSD = infraType === 'bare-metal' ? gpuPricesUSD[gpuType].bareMetal : gpuPricesUSD[gpuType].cloudApi;
+
+  // Коэффициент снижения веса вычислений в зависимости отLoRA / QLoRA
+  let strategyModifier = 1.00;
+  if (strategy === 'lora') strategyModifier = 0.25;
+  else if (strategy === 'qlora') strategyModifier = 0.12;
+
+  // Расчет абстрактного времени обучения (в часах) на основе физики данных и TFLOPS
+  const baseComputeUnits = (cleanDatasetSize * epochs * 4) * strategyModifier;
+  const effectiveClusterTflops = gpuTflops[gpuType] * gpuCount * nvlinkEfficiency;
+  const trainingHours = Math.max(1, Math.ceil((baseComputeUnits * 1000) / effectiveClusterTflops));
+
+  // Итоговая стоимость вычислений (Compute Overhead)
+  const totalComputeCostUSD = trainingHours * pricePerHourUSD * gpuCount;
+  const totalComputeCostFiat = totalComputeCostUSD / fiatRate;
+
+  // 3. Экономика и ROI
+  const engineerSalary = parseFloat(document.getElementById('engineer-salary').value) || 0;
+  const legacySpendMonth = parseFloat(document.getElementById('legacy-spend').value) || 0;
+
+  const totalProjectCostFiat = totalComputeCostFiat + engineerSalary;
+  const legacySpendYear = legacySpendMonth * 12;
+
+  const netSavingsYear = legacySpendYear - totalProjectCostFiat;
+  const roiValue = totalProjectCostFiat > 0 ? (netSavingsYear / totalProjectCostFiat) * 100 : 0;
+
+  return {
+    cleanData: cleanDatasetSize.toFixed(1) + " ГБ",
+    nvlink: Math.round(nvlinkEfficiency * 100) + "%",
+    infra: Math.round(totalComputeCostFiat).toLocaleString('ru-RU'),
+    savings: Math.round(netSavingsYear).toLocaleString('ru-RU'),
+    roi: Math.round(roiValue),
+    currency: currency,
+    epochs: epochs,
+    strategy: strategy,
+    totalCostFiat: totalProjectCostFiat
+  };
+}
+
+function updatePreview() {
+  const data = calculateAllAiMetrics();
+  if (!data) return;
+
+  let zone = "Профессиональный Fine-Tuning";
+  let color = "var(--primary)";
+  let pct = 65;
+
+  if (data.roi < 5 || data.epochs > 15) {
+    zone = "🔴 Риск переобучения (Overfitting Бюджета)";
+    color = "var(--danger)";
+    pct = 15;
+  } else if (data.strategy === 'qlora') {
+    zone = "🏴‍☠️ Максимальная оптимизация (4-bit)";
+    color = "var(--purple)";
+    pct = 95;
+  } else if (data.totalCostFiat > (400000 / fiatToUSD[data.currency])) {
+    zone = "🟡 Критическая нагрузка кластера";
+    color = "var(--accent)";
+    pct = 45;
+  }
+
+  const preview = document.getElementById('live-preview-zone');
+  preview.innerText = zone; 
+  preview.style.color = color;
+
+  const fill = document.getElementById('bar-fill');
+  fill.style.width = pct + '%'; 
+  fill.style.background = color;
+
+  // Живая динамическая подмена партнерского линка (Маскировка RunPod vs Vast.ai)
+  const pLink = document.getElementById('partner-link');
+  if (pLink) {
+    const gpuType = document.getElementById('gpu-type').value;
+    if (gpuType === 'rtx4090') {
+      pLink.innerText = "🤖 Развернуть узлы RTX 4090 на Vast.ai";
+      pLink.href = "https://vast.ai";
+    } else {
+      pLink.innerText = "🤖 Запустить кластер H100/A100 на RunPod";
+      pLink.href = "https://runpod.io";
+    }
+  }
+}
+
+window.onload = function() {
+  updatePreview();
+};
+
+function showAds() {
+  const c = document.getElementById('ads');
+  if (!window.adScriptLoaded) {
+    window.atOptions = {
+      'key': 'e8c895e6c70ade8e4ef4a72354f42e97',
+      'format': 'iframe',
+      'height': 90,
+      'width': 728,
+      'params': {}
+    };
+    var s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.async = !0;
+    s.src = ['https://', 'bagelstoppage.', 'com/', 'e8c895e6c70ade8e4ef4a72354f42e97/', 'invoke.js'].join('');
+    c.appendChild(s);
+    window.adScriptLoaded = !0;
+  }
+  c.style.display = 'flex';
+}
+
+function calculateAiMetrics() {
+  const data = calculateAllAiMetrics();
+  if (!data) return;
+
+  document.getElementById('res-clean-data').innerText = data.cleanData;
+  document.getElementById('res-nvlink').innerText = data.nvlink;
+  document.getElementById('res-infra').innerText = data.infra + " " + data.currency;
+  document.getElementById('res-savings').innerText = data.savings + " " + data.currency;
+  document.getElementById('res-roi').innerText = (data.roi > 0 ? "+" : "") + data.roi + "%";
+
+  // Профессиональный Индекс Судного Дня и Матрицы Переобучения
+  let verdict = `Конфигурация кластера стабильна. Дообучение модели по методологии ${data.strategy.toUpperCase()} защищено от потерь градиента. NVLink обеспечивает оптимальный параллелизм вычислений.`;
+  
+  if (data.epochs > 15) {
+    verdict = `🚨 ФИНАНСОВАЯ ЧЕРНАЯ ДЫРА (OVERFITTING): Вы выкрутили обучение на ${data.epochs} эпох! Нейросеть полностью зазубрит датасет наизусть и станет бесполезной на реальных задачах. Вы сожгли бюджет на аренду GPU впустую, спонсируя облачных провайдеров.`;
+  } else if (data.strategy === 'qlora') {
+    verdict = `🏴‍☠️ ТЕХНОЛОГИЧЕСКИЙ АНАРХИЗМ (4-BIT): Применение QLoRA снизило требования к памяти на 88%. Вы можете дообучать тяжелые промышленные модели на доступных картах RTX 4090, обнулив счета корпоративным гигантам. Эффективность максимальна!`;
+  } else if (parseInt(data.savings.replace(/\s/g, '')) < 0) {
+    verdict = `⚠️ ИНФРАСТРУКТУРНЫЙ КРИЗИС: Затраты на аренду мощностей и зарплату инженеров превышают пользу от ИИ. Вашему стартапу выгоднее продолжать использовать готовое внешнее API, чем содержать собственный неэффективный кластер видеокарт.`;
+  }
+
+  document.getElementById('skynet-verdict').innerText = verdict;
+  document.getElementById('results-box').style.display = 'block';
+  document.getElementById('skynet-container').style.display = 'block';
+  updatePreview();
+  showAds();
+}
+</script>
+</body>
+</html>
